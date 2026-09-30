@@ -16,13 +16,13 @@
 
   <main class="w-full max-w-4xl mx-auto p-4 sm:p-6 flex-grow flex flex-col justify-center">
 
-    <!-- Top Card -->
+    <!-- Header Section -->
     <header class="card-style rounded-2xl p-6 mb-6 border border-[#A855F7]/30 relative overflow-hidden">
       <div class="h-1.5 w-full brand-gradient absolute top-0 right-0"></div>
       <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
         <div>
           <span class="text-xs uppercase tracking-widest text-[#4ADE80] font-bold block mb-1">Prepared under supervision of Mr. Khaled Ashraf</span>
-          <h1 id="exam-title" class="text-xl sm:text-2xl font-extrabold text-white">منصة الاختبارات الإلكترونية الموحدة</h1>
+          <h1 id="exam-main-title" class="text-xl sm:text-2xl font-extrabold text-white">منصة الاختبارات الإلكترونية الموحدة</h1>
           <p class="text-sm text-slate-300 mt-1">«مع أطيب التمنيات لكم بالتفوق والريادة — مستر خالد أشرف»</p>
         </div>
         <div id="timer-box" class="hidden bg-[#0F0A1C] border border-[#4ADE80]/40 px-5 py-2.5 rounded-xl text-center">
@@ -32,10 +32,10 @@
       </div>
     </header>
 
-    <!-- Start Screen -->
+    <!-- Start Exam Screen -->
     <section id="start-screen" class="card-style rounded-2xl p-6 sm:p-8 text-center border border-[#A855F7]/30 shadow-2xl">
       <h2 class="text-2xl font-bold text-white mb-2">بيانات تسجيل الطالب</h2>
-      <p id="exam-badge-text" class="text-slate-400 text-sm mb-6">جارٍ تجهيز جلسة الاختبار...</p>
+      <p id="exam-desc" class="text-slate-400 text-sm mb-6">جارٍ جلب وتجهيز بيانات الامتحان من Google Forms...</p>
 
       <div class="max-w-md mx-auto space-y-4 mb-6">
         <input type="text" id="input-name" placeholder="الاسم ثلاثي أو رباعي" class="w-full px-4 py-3 bg-[#0F0A1C] border border-slate-700 rounded-xl focus:border-[#4ADE80] focus:outline-none text-white text-center">
@@ -47,7 +47,7 @@
       </button>
     </section>
 
-    <!-- Questions Container -->
+    <!-- Questions Display Section -->
     <section id="exam-screen" class="hidden space-y-6">
       <div id="questions-list" class="space-y-6"></div>
       <div class="pt-4 pb-8">
@@ -55,7 +55,7 @@
           تسليم الإجابات وإنهاء الاختبار
         </button>
         <div id="loading-spinner" class="hidden text-center py-4">
-          <p class="text-[#4ADE80] font-bold animate-pulse text-base">جارٍ تقييم الإجابات المقالية بالذكاء الاصطناعي وتجهيز النتيجة...</p>
+          <p class="text-[#4ADE80] font-bold animate-pulse text-base">جارٍ تقييم الإجابات المقالية بالذكاء الاصطناعي ورصد درجاتك في السجل...</p>
         </div>
       </div>
     </section>
@@ -63,7 +63,7 @@
     <!-- Results Screen -->
     <section id="result-screen" class="hidden card-style rounded-2xl p-6 sm:p-8 text-center border border-[#4ADE80]/30 shadow-2xl">
       <div class="w-20 h-20 bg-[#4ADE80]/20 text-[#4ADE80] border-2 border-[#4ADE80] rounded-full flex items-center justify-center mx-auto mb-4 text-3xl font-black">✓</div>
-      <h2 class="text-2xl font-bold text-white mb-1">تم تسليم الاختبار ورصد الدرجات</h2>
+      <h2 class="text-2xl font-bold text-white mb-1">تم تسليم الاختبار ورصد النتيجة</h2>
       <p id="res-student-info" class="text-slate-300 text-sm mb-6"></p>
 
       <div class="inline-block bg-[#0F0A1C] border border-[#A855F7] px-8 py-5 rounded-2xl mb-8">
@@ -79,38 +79,47 @@
 
   </main>
 
+  <!-- Global Footer -->
   <footer class="w-full text-center py-4 border-t border-[#A855F7]/20 text-xs text-slate-400 bg-[#0F0A1C]/80">
     <p>Designed with excellence by <span class="text-[#4ADE80] font-bold">Ahmed Taha</span> &bull; All Rights Reserved 2026</p>
   </footer>
 
   <script>
-    // ضع هنا رابط الـ Web App الخاص بـ Google Apps Script لمرة واحدة فقط
-    const BACKEND_URL = "https://script.google.com/macros/s/AKfycbwbioaOObkBrQguQGCW9KRK3mZvbo7zG6KAWmHFQnwuSD1jIpJzf34WCE4PENB__TGKNg/exec";
+    // -------------------------------------------------------------------
+    // ضع رابط الـ Web App الخاص بك من Google Apps Script هنا فقط:
+    // -------------------------------------------------------------------
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1h-icJlOdmGLti1Il5lPKGgCww-fN8kW7ipNuRUUZIypcpfvnRhEw1VU3-_5PVFO61w/exec";
 
-    // قراءة رقم أو كود الامتحان من الرابط تلقائياً
+    // قراءة كود الـ Google Form من الرابط
     const urlParams = new URLSearchParams(window.location.search);
-    const CURRENT_EXAM_ID = urlParams.get('exam') || '1';
+    const FORM_ID = urlParams.get('id');
 
-    let activeQuestions = [];
+    let loadedQuestions = [];
     let remainingSeconds = 30 * 60;
     let timerInterval = null;
     let studentName = "";
     let studentPhone = "";
 
-    // جلب أسئلة هذا الامتحان فور فتح الصفحة
     window.addEventListener("DOMContentLoaded", async () => {
-      document.getElementById("exam-badge-text").innerText = `كود الاختبار الحالي: [ ${CURRENT_EXAM_ID} ]`;
+      if (!FORM_ID) {
+        document.getElementById("exam-desc").innerText = "خطأ: لم يتم تحديد معرف الامتحان في الرابط (?id=...)";
+        document.getElementById("btn-start").disabled = true;
+        return;
+      }
+
       try {
-        const response = await fetch(`${BACKEND_URL}?exam=${CURRENT_EXAM_ID}`);
+        const response = await fetch(`${SCRIPT_URL}?id=${FORM_ID}`);
         const data = await response.json();
         if (data.status === "success" && data.questions.length > 0) {
-          activeQuestions = data.questions;
+          loadedQuestions = data.questions;
+          if (data.title) document.getElementById("exam-main-title").innerText = data.title;
+          document.getElementById("exam-desc").innerText = data.description || "يرجى كتابة الاسم ورقم الهاتف لبدء الاختبار";
         } else {
-          alert("تنبيه: لم يتم العثور على أسئلة لهذا الامتحان داخل الشيت!");
+          document.getElementById("exam-desc").innerText = "تعذر تحميل الأسئلة من النموذج المحدد.";
         }
       } catch (err) {
         console.error("Fetch Error:", err);
-        alert("تعذر جلب الأسئلة من الشيت. تأكد من إعداد الرابط بشكل صحيح.");
+        document.getElementById("exam-desc").innerText = "تعذر الاتصال بالخادم لجلب أسئلة Google Forms.";
       }
     });
 
@@ -118,29 +127,29 @@
       studentName = document.getElementById("input-name").value.trim();
       studentPhone = document.getElementById("input-phone").value.trim();
 
-      if (!studentName || !studentPhone) return alert("يرجى ملء الاسم ورقم الهاتف");
-      if (activeQuestions.length === 0) return alert("لا توجد أسئلة محملة لبدء الامتحان");
+      if (!studentName || !studentPhone) return alert("يرجى إدخال الاسم ورقم الهاتف أولاً");
+      if (loadedQuestions.length === 0) return alert("لم يتم تحميل الأسئلة بعد");
 
       document.getElementById("start-screen").classList.add("hidden");
       document.getElementById("exam-screen").classList.remove("hidden");
       document.getElementById("timer-box").classList.remove("hidden");
 
-      renderQuestions();
-      startTimer();
+      renderQuestionsUI();
+      startCountdown();
     }
 
-    function renderQuestions() {
+    function renderQuestionsUI() {
       const container = document.getElementById("questions-list");
       container.innerHTML = "";
 
-      activeQuestions.forEach((q, index) => {
+      loadedQuestions.forEach((q, index) => {
         const div = document.createElement("div");
         div.className = "card-style p-6 rounded-2xl border border-slate-700 shadow-md";
 
         if (q.type === "mcq") {
-          const opts = q.options.map((opt, i) => `
+          const opts = q.options.map(opt => `
             <label class="flex items-center gap-3 p-3.5 rounded-xl border border-slate-700 hover:border-[#A855F7] bg-[#0F0A1C]/60 cursor-pointer transition">
-              <input type="radio" name="q_${q.id}" value="${i}" class="w-4 h-4 accent-[#4ADE80]">
+              <input type="radio" name="q_${q.id}" value="${opt}" class="w-4 h-4 accent-[#4ADE80]">
               <span class="text-sm text-slate-200">${opt}</span>
             </label>
           `).join("");
@@ -150,7 +159,7 @@
               <span class="text-xs text-[#4ADE80] font-bold">سؤال اختياري (${q.points} درجات)</span>
               <span class="text-xs text-slate-400">#${index + 1}</span>
             </div>
-            <h3 class="text-base font-bold text-white mb-4 leading-relaxed">${q.question}</h3>
+            <h3 class="text-base font-bold text-white mb-4 leading-relaxed">${q.title}</h3>
             <div class="space-y-2.5">${opts}</div>
           `;
         } else {
@@ -159,7 +168,7 @@
               <span class="text-xs text-[#A855F7] font-bold">سؤال مقالي (${q.points} درجات - تصحيح ذكي)</span>
               <span class="text-xs text-slate-400">#${index + 1}</span>
             </div>
-            <h3 class="text-base font-bold text-white mb-3 leading-relaxed">${q.question}</h3>
+            <h3 class="text-base font-bold text-white mb-3 leading-relaxed">${q.title}</h3>
             <textarea id="essay_${q.id}" rows="4" placeholder="اكتب إجابتك هنا بدقة..." class="w-full p-4 bg-[#0F0A1C] border border-slate-700 rounded-xl focus:border-[#4ADE80] focus:outline-none text-white text-sm leading-relaxed"></textarea>
           `;
         }
@@ -167,7 +176,7 @@
       });
     }
 
-    function startTimer() {
+    function startCountdown() {
       const display = document.getElementById("timer-display");
       timerInterval = setInterval(() => {
         const m = Math.floor(remainingSeconds / 60);
@@ -175,7 +184,7 @@
         display.innerText = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
         if (remainingSeconds <= 0) {
           clearInterval(timerInterval);
-          alert("انتهى الوقت!");
+          alert("انتهى الوقت المحدد للاختبار!");
           submitExam();
         }
         remainingSeconds--;
@@ -187,25 +196,25 @@
       document.getElementById("btn-submit").classList.add("hidden");
       document.getElementById("loading-spinner").classList.remove("hidden");
 
-      const answersPayload = {};
-      activeQuestions.forEach(q => {
+      const answers = {};
+      loadedQuestions.forEach(q => {
         if (q.type === "mcq") {
           const selected = document.querySelector(`input[name="q_${q.id}"]:checked`);
-          answersPayload["q_" + q.id] = selected ? selected.value : null;
+          answers[q.id] = selected ? selected.value : null;
         } else {
-          answersPayload["q_" + q.id] = document.getElementById(`essay_${q.id}`).value.trim();
+          answers[q.id] = document.getElementById(`essay_${q.id}`).value.trim();
         }
       });
 
       try {
-        const response = await fetch(BACKEND_URL, {
+        const response = await fetch(SCRIPT_URL, {
           method: "POST",
           headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({
-            examId: CURRENT_EXAM_ID,
+            formId: FORM_ID,
             name: studentName,
             phone: studentPhone,
-            answers: answersPayload
+            answers: answers
           })
         });
 
