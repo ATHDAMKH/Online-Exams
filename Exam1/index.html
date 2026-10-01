@@ -6,7 +6,6 @@
   <title>منصة التقييم الأكاديمي والبرمجة</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <!-- مكتبات إنشاء تقرير الـ PDF تلقائياً -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -36,12 +35,11 @@
       justify-content: space-between;
     }
 
-    .container { max-width: 840px; margin: 0 auto; width: 100%; }
-
+    .container { max-width: 860px; margin: 0 auto; width: 100%; }
     .screen-view { display: none; width: 100%; }
     .screen-view.active { display: flex; flex-direction: column; }
 
-    /* Loading Screen */
+    /* Loading Spinner */
     #loading-screen { min-height: 80vh; align-items: center; justify-content: center; text-align: center; }
     .spinner {
       width: 56px;
@@ -101,7 +99,7 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-    /* Cards */
+    /* Cards & Forms */
     .glass-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -158,7 +156,7 @@
       margin-bottom: 16px;
     }
 
-    /* Single Question View */
+    /* Single Question Card */
     .question-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -236,14 +234,10 @@
     }
     .btn-nav:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
     .btn-nav:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; transform: none; }
-    .btn-nav-secondary {
-      background: transparent;
-      color: var(--mint-code);
-      border: 1px solid var(--mint-code);
-    }
+    .btn-nav-secondary { background: transparent; color: var(--mint-code); border: 1px solid var(--mint-code); }
     .btn-finish { background: linear-gradient(90deg, #A855F7, #4ADE80); color: #fff; }
 
-    /* Results Screen */
+    /* Results */
     .score-banner {
       text-align: center;
       background: var(--card-bg);
@@ -252,12 +246,45 @@
       padding: 34px 20px;
       margin-bottom: 24px;
     }
+    
+    /* حل مشكلة انقلاب الأرقام بالعزل الصارم */
     .score-number-display {
       font-size: 3.4rem;
       font-weight: 900;
       color: var(--mint-code);
-      font-family: monospace;
+      font-family: 'Courier New', monospace;
+      direction: ltr !important;
+      unicode-bidi: isolate !important;
+      display: inline-block;
     }
+
+    .meta-tag-card {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .meta-tag-pill {
+      background: rgba(15, 10, 28, 0.7);
+      border: 1px solid var(--border-color);
+      padding: 6px 14px;
+      border-radius: 20px;
+      color: var(--text-white);
+    }
+
+    .submission-status-badge {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+    }
+    .status-timeout { background: rgba(239, 68, 68, 0.2); border: 1px solid var(--error); color: #fca5a5; }
+    .status-normal { background: rgba(74, 222, 128, 0.15); border: 1px solid var(--mint-code); color: var(--mint-code); }
+
     .review-box {
       border-right: 5px solid var(--success);
       background: var(--card-bg);
@@ -288,7 +315,6 @@
     }
     @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-    /* عنصر مخفي يُستخدم لتوليد صورة ملف الـ PDF */
     #pdf-report-canvas {
       position: fixed;
       left: 0;
@@ -320,7 +346,7 @@
   <div id="loading-screen" class="screen-view active">
     <div class="spinner"></div>
     <h2 style="font-weight:800; color:var(--mint-code); margin-bottom:8px;">جارٍ تحميل الاختبار الأكاديمي...</h2>
-    <p style="color:var(--text-muted); font-size:0.95rem;">يتم الآن جلب الأسئلة من الخادم، يرجى الانتظار ثوانٍ معدودة</p>
+    <p style="color:var(--text-muted); font-size:0.95rem;">يتم الآن جلب الأسئلة وتجهيز الجلسة، يرجى الانتظار لحظات</p>
   </div>
 
   <!-- 2. ERROR SCREEN -->
@@ -348,7 +374,7 @@
       <div class="info-summary-box">
         <div>📚 عدد الأسئلة: <strong id="info-q-count" style="color:var(--mint-code);">0</strong></div>
         <div>⏱️ مدة الامتحان: <strong id="info-q-time">0</strong> دقيقة</div>
-        <div>💡 نمط الأسئلة: <strong>اختيار من متعدد + أسئلة مقالية بتصحيح ذكي</strong></div>
+        <div>💡 التصحيح: <strong>تصحيح فوري للاختيارات + تصحيح ذكي للمقالي بنظام الدرجات الجزئية</strong></div>
       </div>
 
       <form onsubmit="handleStartExam(event)">
@@ -360,12 +386,15 @@
         <input type="tel" id="student-phone" class="form-input" placeholder="010...">
         <div id="phone-error" class="error-hint">يرجى كتابة رقم الهاتف للمتابعة</div>
 
+        <label style="font-weight:700; font-size:0.9rem;">📧 البريد الإلكتروني (لتسلم النتيجة والشهادة):</label>
+        <input type="email" id="student-email" class="form-input" placeholder="name@example.com (اختياري، يُحفظ تلقائياً)">
+
         <button type="submit" class="btn-nav" style="width:100%;">✅ ابدأ الاختبار الآن</button>
       </form>
     </div>
   </div>
 
-  <!-- 4. QUIZ SCREEN (سؤال بسؤال مع الحماية من الغش) -->
+  <!-- 4. QUIZ SCREEN -->
   <div id="quiz-screen" class="screen-view">
     <div class="header-card">
       <div class="signature-gradient-line"></div>
@@ -385,11 +414,10 @@
       ⚠️ يرجى الإجابة عن هذا السؤال قبل الانتقال للسؤال التالي
     </div>
 
-    <!-- بطاقة السؤال الفردي المعروض -->
     <div id="single-question-area"></div>
 
     <div id="submitting-spinner" style="display:none; color:var(--mint-code); text-align:center; font-weight:bold; margin-top:12px;">
-      ⏳ جارٍ تقييم الإجابات بالذكاء الاصطناعي وتجهيز تقرير PDF وحفظ الدرجات في السجل...
+      ⏳ جارٍ مراجعة الأسئلة وتوثيق النتيجة واعتماد درجات المقالي...
     </div>
   </div>
 
@@ -397,20 +425,29 @@
   <div id="results-screen" class="screen-view">
     <div id="report-canvas-source">
       <div class="score-banner">
-        <div id="score-emoji" style="font-size:3.5rem; margin-bottom:8px;">🏆</div>
-        <div class="score-number-display" id="final-score-text">0 / 0</div>
-        <div id="score-message-text" style="font-size:1.2rem; font-weight:800; color:var(--mint-code); margin:8px 0;"></div>
-        <p id="student-meta-details" style="color:var(--text-muted); font-size:0.95rem;"></p>
+        <div id="submission-status-box" class="submission-status-badge"></div>
+        <div id="score-emoji" style="font-size:3.5rem; margin-bottom:4px;">🏆</div>
         
-        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+        <!-- هنا يتم عرض الدرجة محصنة ضد الانعكاس -->
+        <div class="score-number-display" id="final-score-text">0 / 0</div>
+        
+        <div id="score-message-text" style="font-size:1.2rem; font-weight:800; color:var(--mint-code); margin:8px 0;"></div>
+        
+        <div class="meta-tag-card">
+          <div class="meta-tag-pill">👤 الطالب: <bdi id="meta-student-name"></bdi></div>
+          <div class="meta-tag-pill">📱 الهاتف: <bdi dir="ltr" id="meta-student-phone"></bdi></div>
+          <div class="meta-tag-pill">📅 التاريخ: <bdi id="meta-exam-date"></bdi></div>
+        </div>
+
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:20px;">
           <a id="wa-share-link" href="#" target="_blank" style="background:#25D366; color:#fff; padding:12px 24px; border-radius:12px; font-weight:800; text-decoration:none;">
             📱 إرسال التقرير على واتساب
           </a>
           <button id="download-pdf-manual-btn" class="btn-nav btn-nav-secondary" onclick="generateAndDownloadPDF()">
-            📄 إعادة تحميل تقرير PDF
+            📄 تحميل تقرير PDF
           </button>
         </div>
-        <div id="pdf-status-hint" style="color:var(--mint-code); font-size:0.85rem; margin-top:10px; font-weight:bold;"></div>
+        <div id="pdf-status-hint" style="color:var(--mint-code); font-size:0.85rem; margin-top:12px; font-weight:bold;"></div>
       </div>
 
       <h3 style="margin-bottom:16px; font-weight:800;">تفاصيل الأسئلة والتصحيح:</h3>
@@ -420,7 +457,6 @@
 
 </div>
 
-<!-- حاوية مخصصة لتوليد صورة الـ PDF -->
 <div id="pdf-report-canvas"></div>
 
 <footer>
@@ -429,24 +465,17 @@
 
 <script>
   // =========================================================================
-  // ⚙️ لوحة الإعدادات والتحكم السريع (تعديل مباشر بدون أي تعقيد)
+  // لوحة الإعدادات والتحكم
   // =========================================================================
   const EXAM_SETTINGS = {
-    // 1. مدة الامتحان الافتراضية بالدقائق (يمكنك تغييرها من هنا متى شئت)
     defaultDurationMinutes: 30,
-
-    // 2. رقم هاتف المستر لاستقبال رسائل الواتساب
     teacherPhone: "201019502488",
-
-    // 3. اسم المستر ورسالة التشجيع
     teacherName: "مستر خالد أشرف",
     encouragementQuote: "«مع أطيب التمنيات لكم بالتفوق — مستر خالد أشرف»",
-
-    // 4. رابط الـ Web App الخاص بك من Google Apps Script
+    // استبدل هذا برابط السيرفر المنشور لديك
     scriptUrl: "https://script.google.com/macros/s/AKfycbyN2-FSX_Eq1kLeVtuMDVSRgxnqHZQw_4fcCsgetZ-jWZhfuNe-ZE7c5jx53s9YpcKmdQ/exec"
   };
 
-  // State Management
   let appState = {
     formId: "",
     examTitle: "",
@@ -456,10 +485,11 @@
     userAnswers: {},
     studentName: "",
     studentPhone: "",
+    studentEmail: "",
     examStartTimestamp: null,
     timerInterval: null,
     submitted: false,
-    serverResult: null
+    submissionType: "تسليم يدوي"
   };
 
   function switchScreen(screenId) {
@@ -493,20 +523,27 @@
     } catch (e) {}
   }
 
-  // تهيئة الصفحة وقراءة الرابط
+  // تهيئة الصفحة وقراءة الرابط وحفظ الإيميل
   window.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     appState.formId = params.get('id');
 
-    // ميزة ضبط الوقت من الرابط مباشرة إذا أردت تخصيصه لكل امتحان
-    const customTimeParam = params.get('time');
-    if (customTimeParam && !isNaN(customTimeParam)) {
-      appState.examDurationSec = parseInt(customTimeParam) * 60;
+    const customTime = params.get('time');
+    if (customTime && !isNaN(customTime)) {
+      appState.examDurationSec = parseInt(customTime) * 60;
     }
 
     document.getElementById('start-quote-text').innerText = EXAM_SETTINGS.encouragementQuote;
     document.getElementById('quiz-sub-title').innerText = `إشراف: ${EXAM_SETTINGS.teacherName}`;
     document.getElementById('info-q-time').innerText = Math.round(appState.examDurationSec / 60);
+
+    // استرجاع الإيميل والاسم المخزنين سابقاً
+    const cachedEmail = localStorage.getItem("saved_student_email");
+    if (cachedEmail) document.getElementById('student-email').value = cachedEmail;
+    const cachedName = localStorage.getItem("saved_student_name");
+    if (cachedName) document.getElementById('student-name').value = cachedName;
+    const cachedPhone = localStorage.getItem("saved_student_phone");
+    if (cachedPhone) document.getElementById('student-phone').value = cachedPhone;
 
     if (!appState.formId) {
       document.getElementById('error-msg-detail').innerText = "لم يتم تحديد معرّف النموذج في الرابط (?id=...)";
@@ -542,6 +579,7 @@
     e.preventDefault();
     const nameInput = document.getElementById('student-name');
     const phoneInput = document.getElementById('student-phone');
+    const emailInput = document.getElementById('student-email');
 
     let valid = true;
     if (!nameInput.value.trim()) {
@@ -562,6 +600,12 @@
 
     appState.studentName = nameInput.value.trim();
     appState.studentPhone = phoneInput.value.trim();
+    appState.studentEmail = emailInput.value.trim();
+
+    // حفظ البيانات محلياً للمرات القادمة
+    localStorage.setItem("saved_student_name", appState.studentName);
+    localStorage.setItem("saved_student_phone", appState.studentPhone);
+    if (appState.studentEmail) localStorage.setItem("saved_student_email", appState.studentEmail);
 
     switchScreen('quiz');
     renderSingleQuestion(0);
@@ -569,7 +613,7 @@
     triggerToast(`بالتوفيق يا ${appState.studentName}`);
   }
 
-  // عرض سؤال بسؤال (Step-by-Step UI) مع ضمان ظهور نص السؤال
+  // عرض سؤال بسؤال
   function renderSingleQuestion(idx) {
     appState.currentQIndex = idx;
     const q = appState.questions[idx];
@@ -580,7 +624,6 @@
     card.className = 'question-card';
     card.id = `card-${q.id}`;
 
-    // ضمان قراءة نص السؤال حتى لو كان باسم q أو title
     const questionText = q.q || q.title || "سؤال رقم " + (idx + 1);
 
     let inputBlock = '';
@@ -599,8 +642,8 @@
     } else {
       const currentVal = appState.userAnswers[q.id] || '';
       inputBlock = `
-        <textarea class="essay-field" id="essay_${q.id}" placeholder="اكتب إجابتك هنا بدقة...">${currentVal}</textarea>
-        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:6px;">ملاحظة: هذا السؤال مقالي وسيتم تقييمه مفاهيمياً بواسطة الذكاء الاصطناعي.</p>
+        <textarea class="essay-field" id="essay_${q.id}" placeholder="اكتب إجابتك هنا بأسلوبك العلمي...">${currentVal}</textarea>
+        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:6px;">ملاحظة: هذا السؤال مقالي وسيتم تقييمه مفاهيمياً ومنح درجات جزئية ذكية.</p>
       `;
     }
 
@@ -611,13 +654,13 @@
         <div>${typeBadgeText} <span style="font-size:0.85rem; color:var(--mint-code);">(${q.points} درجات)</span></div>
         <span style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">سؤال ${idx + 1} من ${appState.questions.length}</span>
       </div>
-      <div class="q-title-text">${questionText}</div>${inputBlock}
+      <div class="q-title-text">${questionText}</div>
+      ${inputBlock}
       <div class="nav-bar" id="nav-bar-container"></div>
     `;
 
     area.appendChild(card);
 
-    // ربط الاختيارات
     if (q.type === 'mcq') {
       card.querySelectorAll('.option-row').forEach(row => {
         row.addEventListener('click', function() {
@@ -676,6 +719,7 @@
       }
 
       if (isLast) {
+        appState.submissionType = "تسليم يدوي";
         submitExamSession();
       } else {
         renderSingleQuestion(appState.currentQIndex + 1);
@@ -694,7 +738,7 @@
     document.getElementById('progress-text').innerText = `السؤال ${idx + 1} من ${total}`;
   }
 
-  // المؤقت الحقيقي ضد الغش
+  // المؤقت الحقيقي مع رصد نفاذ الوقت
   function initTimerAntiCheat() {
     const timerElem = document.getElementById('timer-badge');
     appState.examStartTimestamp = Date.now();
@@ -716,6 +760,7 @@
 
       if (rem <= 0) {
         clearInterval(appState.timerInterval);
+        appState.submissionType = "تسليم تلقائي (نفاذ الوقت)";
         submitExamSession(true);
       }
     }
@@ -750,15 +795,16 @@
           formId: appState.formId,
           name: appState.studentName,
           phone: appState.studentPhone,
+          email: appState.studentEmail,
+          submissionType: appState.submissionType,
           answers: appState.userAnswers
         })
       });
 
       const result = await response.json();
       if (result.status === "success") {
-        appState.serverResult = result;
         renderResultsView(result);
-        generateAndDownloadPDF(); // توليد وتحميل ملف PDF تلقائياً
+        // تم إلغاء التحميل التلقائي للـ PDF بناءً على طلبك
       } else {
         alert("تنبيه من السيرفر: " + result.message);
       }
@@ -772,14 +818,28 @@
     const maxScore = result.maxScore;
     const pct = Math.round((totalScore / maxScore) * 100);
 
-    document.getElementById('final-score-text').innerText = `${totalScore} /${maxScore}`;
+    // كتابة الدرجة باتجاه LTR لضمان عدم انقلاب الأرقام إطلاقاً
+    document.getElementById('final-score-text').innerHTML = `<span dir="ltr">${totalScore} / ${maxScore}</span>`;
+    
     document.getElementById('score-emoji').innerText = pct >= 85 ? '🏆' : (pct >= 65 ? '😄' : '😕');
 
     let msg = pct >= 85 ? "أداء ممتاز! استمر في هذا التفوق" : (pct >= 65 ? "جيد جداً، واصل التدريب والتفوق" : "تحتاج إلى مراجعة بعض المفاهيم");
     document.getElementById('score-message-text').innerText = `${msg} (${pct}%)`;
 
-    const today = new Date().toLocaleDateString('ar-EG');
-    document.getElementById('student-meta-details').innerText = `الطالب: ${appState.studentName} | الهاتف: ${appState.studentPhone} \vert{} التاريخ: ${today}`;
+    // توضيح حالة التسليم (هل تم التسليم يدوياً أم لنفاذ الوقت)
+    const statusBox = document.getElementById('submission-status-box');
+    if (appState.submissionType.includes("تلقائي")) {
+      statusBox.className = "submission-status-badge status-timeout";
+      statusBox.innerText = "⚠️ تم إنهاء وتسليم الاختبار تلقائياً لنفاذ الوقت المحدد (30 دقيقة)";
+    } else {
+      statusBox.className = "submission-status-badge status-normal";
+      statusBox.innerText = "✅ تم تسليم الاختبار بنجاح بمعرفة الطالب";
+    }
+
+    // بطاقات البيانات المنفصلة لمنع تشوه النصوص
+    document.getElementById('meta-student-name').innerText = appState.studentName;
+    document.getElementById('meta-student-phone').innerText = appState.studentPhone;
+    document.getElementById('meta-exam-date').innerText = new Date().toLocaleDateString('ar-EG');
 
     const area = document.getElementById('reviews-render-area');
     area.innerHTML = '';
@@ -803,12 +863,13 @@
       } else {
         answerHtml = `
           <div class="answer-tag" style="background:rgba(255,255,255,0.06); color:#fff;"><strong>إجابتك:</strong> ${r.userAnswer}</div>
-          <div class="answer-tag correct"><strong>تقييم الذكاء الاصطناعي (${r.awardedScore}/${r.maxScore}):</strong>${r.feedback}</div>
+          <div class="answer-tag correct"><strong>تقييم الذكاء الاصطناعي (${r.awardedScore}/${r.maxScore}):</strong> ${r.feedback}</div>
         `;
       }
 
       box.innerHTML = `
-        <div style="font-weight:700; margin-bottom:6px;">السؤال ${i + 1}: ${r.q}</div>${answerHtml}
+        <div style="font-weight:700; margin-bottom:6px;">السؤال ${i + 1}: ${r.q}</div>
+        ${answerHtml}
       `;
       area.appendChild(box);
     });
@@ -818,6 +879,7 @@
     waMsg += `━━━━━━━━━━━━━━━━\n`;
     waMsg += `👤 *اسم الطالب:* ${appState.studentName}\n`;
     waMsg += `📱 *الهاتف:* ${appState.studentPhone}\n`;
+    waMsg += `⏱️ *حالة التسليم:* ${appState.submissionType}\n`;
     waMsg += `🎯 *الدرجة النهائية:* ${totalScore} / ${maxScore} (${pct}%)\n`;
     waMsg += wrongNumbers.length ? `❌ *الأسئلة التي تحتاج مراجعة:* ${wrongNumbers.join('، ')}\n` : `✅ *درجة كاملة دون أخطاء*\n`;
     waMsg += `━━━━━━━━━━━━━━━━\nإشراف: ${EXAM_SETTINGS.teacherName}`;
@@ -828,10 +890,10 @@
     triggerToast("✅ تم اعتماد نتيجتك بنجاح");
   }
 
-  // توليد ملف PDF وتنزيله على جهاز الطالب
+  // تنزيل ملف الـ PDF فقط عند ضغط الطالب يدوياً
   async function generateAndDownloadPDF() {
     const hint = document.getElementById('pdf-status-hint');
-    hint.innerText = "⏳ جارٍ تجهيز وتحميل ملف تقرير الـ PDF...";
+    hint.innerText = "⏳ جارٍ إنشاء ملف PDF، يرجى الانتظار...";
 
     try {
       const source = document.getElementById('report-canvas-source');
@@ -869,7 +931,7 @@
       hint.innerText = "✅ تم تنزيل ملف PDF بنجاح على جهازك.";
     } catch (e) {
       console.error(e);
-      hint.innerText = "⚠️ تعذر التحميل التلقائي للـ PDF، يمكنك المحاولة بالضغط على الزر أعلاه.";
+      hint.innerText = "⚠️ حدث خطأ أثناء تجهيز ملف PDF، يرجى المحاولة مرة أخرى.";
     }
   }
 </script>
