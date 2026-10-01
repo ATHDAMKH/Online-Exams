@@ -23,7 +23,7 @@
         <div>
           <span class="text-xs uppercase tracking-widest text-[#4ADE80] font-bold block mb-1">Prepared under supervision of Mr. Khaled Ashraf</span>
           <h1 id="exam-main-title" class="text-xl sm:text-2xl font-extrabold text-white">منصة الاختبارات الإلكترونية الموحدة</h1>
-          <p class="text-sm text-slate-300 mt-1">«مع أطيب التمنيات لكم بالتفوق والريادة — مستر خالد أشرف»</p>
+          <p class="text-sm text-slate-300 mt-1">«مع أطيب التمنيات لكم بالتفوق — مستر خالد أشرف»</p>
         </div>
         <div id="timer-box" class="hidden bg-[#0F0A1C] border border-[#4ADE80]/40 px-5 py-2.5 rounded-xl text-center">
           <span class="text-xs text-[#4ADE80] block font-semibold">الوقت المتبقي</span>
@@ -79,18 +79,14 @@
 
   </main>
 
-  <!-- Global Footer -->
   <footer class="w-full text-center py-4 border-t border-[#A855F7]/20 text-xs text-slate-400 bg-[#0F0A1C]/80">
-    <p>Designed with excellence by <span class="text-[#4ADE80] font-bold">Ahmed Taha</span> &bull; All Rights Reserved 2026</p>
+    <p>Designed by <span class="text-[#4ADE80] font-bold">Ahmed Taha</span> &bull; All Rights Reserved 2026</p>
   </footer>
 
   <script>
-    // -------------------------------------------------------------------
-    // ضع رابط الـ Web App الخاص بك من Google Apps Script هنا فقط:
-    // -------------------------------------------------------------------
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw1h-icJlOdmGLti1Il5lPKGgCww-fN8kW7ipNuRUUZIypcpfvnRhEw1VU3-_5PVFO61w/exec";
+    // استبدل هذا بالرابط الذي نسخته من Google Apps Script (Web app URL)
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyN2-FSX_Eq1kLeVtuMDVSRgxnqHZQw_4fcCsgetZ-jWZhfuNe-ZE7c5jx53s9YpcKmdQ/exec";
 
-    // قراءة كود الـ Google Form من الرابط
     const urlParams = new URLSearchParams(window.location.search);
     const FORM_ID = urlParams.get('id');
 
@@ -102,7 +98,7 @@
 
     window.addEventListener("DOMContentLoaded", async () => {
       if (!FORM_ID) {
-        document.getElementById("exam-desc").innerText = "خطأ: لم يتم تحديد معرف الامتحان في الرابط (?id=...)";
+        document.getElementById("exam-desc").innerText = "تنبيه: لم يتم العثور على كود الامتحان في الرابط (?id=...)";
         document.getElementById("btn-start").disabled = true;
         return;
       }
@@ -224,24 +220,24 @@
           document.getElementById("timer-box").classList.add("hidden");
           document.getElementById("result-screen").classList.remove("hidden");
 
-          document.getElementById("res-student-info").innerText = `الطالب: ${studentName} | الهاتف: ${studentPhone}`;
-          document.getElementById("res-score-badge").innerText = `${result.totalScore} / ${result.maxScore}`;
+          document.getElementById("res-student-info").innerText = `الطالب: ${studentName} \vert{} الهاتف: ${studentPhone}`;
+          document.getElementById("res-score-badge").innerText = `${result.totalScore} /${result.maxScore}`;
 
           let reviewsHtml = "";
           result.reviews.forEach((r, idx) => {
             if (r.isEssay) {
               reviewsHtml += `
                 <div class="p-4 bg-[#0F0A1C] border border-[#A855F7]/40 rounded-xl text-right">
-                  <p class="font-bold text-sm text-purple-200">س${idx + 1}: ${r.question}</p>
+                  <p class="font-bold text-sm text-purple-200">س${idx + 1}:${r.question}</p>
                   <p class="text-xs text-slate-300 mt-1"><strong>إجابتك:</strong> ${r.studentText}</p>
-                  <p class="text-xs text-[#4ADE80] mt-1"><strong>تقييم الذكاء الاصطناعي (${r.awardedScore}/${r.maxScore}):</strong> ${r.feedback}</p>
+                  <p class="text-xs text-[#4ADE80] mt-1"><strong>تقييم الذكاء الاصطناعي (${r.awardedScore}/${r.maxScore}):</strong>${r.feedback}</p>
                 </div>
               `;
             } else {
               const bgClass = r.correct ? "bg-green-950/30 border-green-500/40 text-green-300" : "bg-red-950/30 border-red-500/40 text-red-300";
               reviewsHtml += `
                 <div class="p-4 border rounded-xl text-right ${bgClass}">
-                  <p class="font-bold text-sm">س${idx + 1}: ${r.question}</p>
+                  <p class="font-bold text-sm">س${idx + 1}:${r.question}</p>
                   <p class="text-xs mt-1">${r.msg}</p>
                 </div>
               `;
