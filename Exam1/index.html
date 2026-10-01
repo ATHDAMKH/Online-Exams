@@ -775,7 +775,7 @@
     });
   }
 
-  // تسليم الامتحان
+// تسليم الامتحان مع تمرير معرّف الامتحان في الرابط ومحتوى الطلب معاً
   async function submitExamSession(autoSubmit = false) {
     if (appState.submitted) return;
     appState.submitted = true;
@@ -788,7 +788,10 @@
     if (nav) nav.style.display = 'none';
 
     try {
-      const response = await fetch(EXAM_SETTINGS.scriptUrl, {
+      // تمرير الـ ID في الرابط لحمايته من فقدان البيانات أثناء تحويلات السيرفر
+      const targetUrl = `${EXAM_SETTINGS.scriptUrl}?id=${encodeURIComponent(appState.formId)}`;
+
+      const response = await fetch(targetUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
@@ -804,7 +807,6 @@
       const result = await response.json();
       if (result.status === "success") {
         renderResultsView(result);
-        // تم إلغاء التحميل التلقائي للـ PDF بناءً على طلبك
       } else {
         alert("تنبيه من السيرفر: " + result.message);
       }
