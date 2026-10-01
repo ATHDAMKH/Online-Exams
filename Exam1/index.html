@@ -6,6 +6,9 @@
   <title>منصة التقييم الأكاديمي والبرمجة</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <!-- مكتبات إنشاء تقرير الـ PDF تلقائياً -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --dark-space: #0F0A1C;
@@ -33,19 +36,13 @@
       justify-content: space-between;
     }
 
-    .container { max-width: 860px; margin: 0 auto; width: 100%; }
+    .container { max-width: 840px; margin: 0 auto; width: 100%; }
 
-    /* ============ SCREENS ============ */
     .screen-view { display: none; width: 100%; }
     .screen-view.active { display: flex; flex-direction: column; }
 
-    /* ============ LOADING SCREEN ============ */
-    #loading-screen {
-      min-height: 80vh;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
+    /* Loading Screen */
+    #loading-screen { min-height: 80vh; align-items: center; justify-content: center; text-align: center; }
     .spinner {
       width: 56px;
       height: 56px;
@@ -57,12 +54,12 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* ============ HEADER ============ */
+    /* Header */
     .header-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 24px 28px;
+      padding: 22px 26px;
       margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
@@ -81,7 +78,7 @@
       top: 0;
       right: 0;
     }
-    .header-content h1 { font-size: 1.5rem; font-weight: 900; margin-bottom: 4px; }
+    .header-content h1 { font-size: 1.45rem; font-weight: 900; margin-bottom: 4px; }
     .header-content p { font-size: 0.9rem; color: var(--text-muted); }
     .timer-badge {
       background: var(--dark-space);
@@ -104,12 +101,12 @@
     }
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 
-    /* ============ CARDS & FORMS ============ */
+    /* Cards */
     .glass-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 28px;
+      padding: 26px;
       margin-bottom: 20px;
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
     }
@@ -134,21 +131,16 @@
       margin-top: 6px;
       margin-bottom: 16px;
       box-sizing: border-box;
-      transition: all 0.2s;
     }
-    .form-input:focus {
-      outline: none;
-      border-color: var(--mint-code);
-      box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
-    }
+    .form-input:focus { outline: none; border-color: var(--mint-code); }
     .error-hint { color: var(--error); font-size: 0.85rem; font-weight: 700; display: none; margin-top: -12px; margin-bottom: 12px; }
 
-    /* ============ PROGRESS BAR ============ */
+    /* Progress Bar */
     .progress-wrapper {
       background: rgba(255, 255, 255, 0.08);
       border-radius: 8px;
       height: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 8px;
       overflow: hidden;
       border: 1px solid var(--border-color);
     }
@@ -158,39 +150,44 @@
       width: 0%;
       transition: width 0.3s ease;
     }
+    .progress-label-text {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
 
-    /* ============ QUESTIONS ============ */
+    /* Single Question View */
     .question-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 16px;
       padding: 24px;
       margin-bottom: 16px;
-      transition: all 0.2s;
+      min-height: 320px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
-    .question-card.unanswered {
-      border-color: var(--warning) !important;
-      background: rgba(245, 158, 11, 0.08);
+    .question-card.unanswered { border-color: var(--warning) !important; background: rgba(245, 158, 11, 0.08); }
+    .q-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-left: 8px;
     }
-    .q-number-badge {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      background: var(--ai-purple);
-      color: #fff;
-      border-radius: 50%;
-      font-weight: 800;
-      font-size: 0.95rem;
-      margin-left: 10px;
-    }
-    .q-title-text { font-size: 1.1rem; font-weight: 700; margin: 12px 0 16px; line-height: 1.6; }
+    .badge-mcq { background: rgba(74, 222, 128, 0.15); color: var(--mint-code); }
+    .badge-essay { background: rgba(168, 85, 247, 0.2); color: var(--ai-purple); }
+    .q-title-text { font-size: 1.15rem; font-weight: 700; margin: 16px 0 20px; line-height: 1.7; }
+    
     .option-row {
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 13px 16px;
+      padding: 14px 16px;
       border: 1px solid var(--border-color);
       background: rgba(15, 10, 28, 0.6);
       border-radius: 12px;
@@ -201,8 +198,10 @@
     .option-row:hover { border-color: var(--ai-purple); background: rgba(168, 85, 247, 0.12); }
     .option-row.selected { border-color: var(--mint-code); background: rgba(74, 222, 128, 0.12); font-weight: 700; }
     .option-row input { accent-color: var(--mint-code); width: 18px; height: 18px; }
+    
     textarea.essay-field {
       width: 100%;
+      min-height: 140px;
       padding: 14px;
       background: var(--dark-space);
       border: 1px solid var(--border-color);
@@ -210,39 +209,51 @@
       border-radius: 12px;
       font-family: inherit;
       font-size: 0.95rem;
-      box-sizing: border-box;
       resize: vertical;
+      line-height: 1.6;
     }
     textarea.essay-field:focus { outline: none; border-color: var(--mint-code); }
 
-    /* ============ BUTTONS ============ */
-    .btn-action {
+    /* Navigation Bar */
+    .nav-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 16px;
+    }
+    .btn-nav {
       background: var(--mint-code);
       color: var(--dark-space);
       border: none;
-      padding: 15px 36px;
-      font-size: 1.05rem;
+      padding: 13px 28px;
+      font-size: 1rem;
       border-radius: 12px;
       cursor: pointer;
-      font-weight: 900;
-      transition: all 0.2s;
-      width: 100%;
+      font-weight: 800;
       font-family: inherit;
-      letter-spacing: 0.5px;
+      transition: all 0.2s;
     }
-    .btn-action:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(74, 222, 128, 0.3); }
+    .btn-nav:hover:not(:disabled) { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-nav:disabled { background: #475569; color: #94a3b8; cursor: not-allowed; transform: none; }
+    .btn-nav-secondary {
+      background: transparent;
+      color: var(--mint-code);
+      border: 1px solid var(--mint-code);
+    }
+    .btn-finish { background: linear-gradient(90deg, #A855F7, #4ADE80); color: #fff; }
 
-    /* ============ RESULTS ============ */
+    /* Results Screen */
     .score-banner {
       text-align: center;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 20px;
-      padding: 36px 20px;
+      padding: 34px 20px;
       margin-bottom: 24px;
     }
     .score-number-display {
-      font-size: 3.6rem;
+      font-size: 3.4rem;
       font-weight: 900;
       color: var(--mint-code);
       font-family: monospace;
@@ -251,8 +262,8 @@
       border-right: 5px solid var(--success);
       background: var(--card-bg);
       border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 14px;
+      padding: 18px;
+      margin-bottom: 12px;
       border-top: 1px solid var(--border-color);
       border-bottom: 1px solid var(--border-color);
       border-left: 1px solid var(--border-color);
@@ -262,7 +273,7 @@
     .answer-tag.correct { background: rgba(74, 222, 128, 0.15); color: var(--mint-code); font-weight: 600; }
     .answer-tag.wrong { background: rgba(239, 68, 68, 0.15); color: #fca5a5; font-weight: 600; }
 
-    /* ============ TOAST NOTIFICATION ============ */
+    /* Toast */
     .toast-box {
       position: fixed;
       bottom: 24px;
@@ -271,12 +282,25 @@
       color: var(--dark-space);
       padding: 14px 22px;
       border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
       font-weight: 800;
       z-index: 9999;
       animation: slideUp 0.3s ease;
     }
     @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    /* عنصر مخفي يُستخدم لتوليد صورة ملف الـ PDF */
+    #pdf-report-canvas {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 750px;
+      background: #0F0A1C;
+      color: #FFFFFF;
+      padding: 30px;
+      transform: translateX(-150%);
+      pointer-events: none;
+      z-index: -1;
+    }
 
     footer {
       text-align: center;
@@ -296,7 +320,7 @@
   <div id="loading-screen" class="screen-view active">
     <div class="spinner"></div>
     <h2 style="font-weight:800; color:var(--mint-code); margin-bottom:8px;">جارٍ تحميل الاختبار الأكاديمي...</h2>
-    <p style="color:var(--text-muted); font-size:0.95rem;">يتم الآن الاتصال بنموذج الأسئلة، يرجى الانتظار ثوانٍ معدودة</p>
+    <p style="color:var(--text-muted); font-size:0.95rem;">يتم الآن جلب الأسئلة من الخادم، يرجى الانتظار ثوانٍ معدودة</p>
   </div>
 
   <!-- 2. ERROR SCREEN -->
@@ -305,7 +329,7 @@
       <div style="font-size:3.5rem; margin-bottom:14px;">⚠️</div>
       <h2 style="color:var(--error); margin-bottom:12px;">تعذر تحميل الاختبار</h2>
       <p id="error-msg-detail" style="color:var(--text-muted); margin-bottom:24px;">تأكد من كود النموذج في الرابط أو تحقق من اتصال الإنترنت.</p>
-      <button class="btn-action" style="max-width:280px; margin:0 auto;" onclick="location.reload()">🔄 إعادة المحاولة</button>
+      <button class="btn-nav" style="margin:0 auto;" onclick="location.reload()">🔄 إعادة المحاولة</button>
     </div>
   </div>
 
@@ -315,16 +339,16 @@
       <div class="signature-gradient-line"></div>
       <div class="header-content">
         <h1 id="start-exam-title">منصة التقييم الأكاديمي والبرمجة</h1>
-        <p>«مع أطيب التمنيات لكم بالتفوق والريادة — مستر خالد أشرف»</p>
+        <p id="start-quote-text"></p>
       </div>
     </div>
 
     <div class="glass-card">
-      <h2 style="font-size:1.4rem; font-weight:800; margin-bottom:12px;">تسجيل بيانات الطالب</h2>
+      <h2 style="font-size:1.35rem; font-weight:800; margin-bottom:12px;">تسجيل بيانات الطالب</h2>
       <div class="info-summary-box">
         <div>📚 عدد الأسئلة: <strong id="info-q-count" style="color:var(--mint-code);">0</strong></div>
-        <div>⏱️ المدة الزمنية: <strong>30 دقيقة</strong></div>
-        <div>💡 نوع التقييم: <strong>اختيارات متعددة + تصحيح مقالي بالذكاء الاصطناعي</strong></div>
+        <div>⏱️ مدة الامتحان: <strong id="info-q-time">0</strong> دقيقة</div>
+        <div>💡 نمط الأسئلة: <strong>اختيار من متعدد + أسئلة مقالية بتصحيح ذكي</strong></div>
       </div>
 
       <form onsubmit="handleStartExam(event)">
@@ -336,57 +360,68 @@
         <input type="tel" id="student-phone" class="form-input" placeholder="010...">
         <div id="phone-error" class="error-hint">يرجى كتابة رقم الهاتف للمتابعة</div>
 
-        <button type="submit" class="btn-action">✅ ابدأ الاختبار الآن</button>
+        <button type="submit" class="btn-nav" style="width:100%;">✅ ابدأ الاختبار الآن</button>
       </form>
     </div>
   </div>
 
-  <!-- 4. QUIZ SCREEN -->
+  <!-- 4. QUIZ SCREEN (سؤال بسؤال مع الحماية من الغش) -->
   <div id="quiz-screen" class="screen-view">
     <div class="header-card">
       <div class="signature-gradient-line"></div>
       <div class="header-content">
-        <h1 id="quiz-title">الاختبار</h1>
-        <p>إشراف: مستر خالد أشرف</p>
+        <h1 id="quiz-header-title">الاختبار</h1>
+        <p id="quiz-sub-title"></p>
       </div>
-      <div class="timer-badge" id="timer-badge">30:00</div>
+      <div class="timer-badge" id="timer-badge">00:00</div>
     </div>
 
     <div class="progress-wrapper">
       <div class="progress-bar-fill" id="progress-fill"></div>
     </div>
+    <div class="progress-label-text" id="progress-text">السؤال 1 من 1</div>
 
     <div id="unanswered-warning" style="display:none; color:var(--error); text-align:center; font-weight:700; margin-bottom:12px;">
-      ⚠️ يرجى الإجابة عن جميع الأسئلة قبل التسليم
+      ⚠️ يرجى الإجابة عن هذا السؤال قبل الانتقال للسؤال التالي
     </div>
 
-    <div id="questions-render-area"></div>
+    <!-- بطاقة السؤال الفردي المعروض -->
+    <div id="single-question-area"></div>
 
-    <div style="position:sticky; bottom:0; padding:16px 0; background:rgba(15,10,28,0.95); backdrop-filter:blur(10px); border-top:1px solid var(--border-color); text-align:center;">
-      <button class="btn-action" id="submit-btn" onclick="submitExam()">🏁 تسليم الاختبار واعتماد النتيجة</button>
-      <div id="submitting-spinner" style="display:none; color:var(--mint-code); font-weight:bold; margin-top:8px;">
-        جارٍ تقييم الإجابات المقالية بالذكاء الاصطناعي وتوثيق نتيجتك في السجل...
-      </div>
+    <div id="submitting-spinner" style="display:none; color:var(--mint-code); text-align:center; font-weight:bold; margin-top:12px;">
+      ⏳ جارٍ تقييم الإجابات بالذكاء الاصطناعي وتجهيز تقرير PDF وحفظ الدرجات في السجل...
     </div>
   </div>
 
   <!-- 5. RESULTS SCREEN -->
   <div id="results-screen" class="screen-view">
-    <div class="score-banner">
-      <div id="score-emoji" style="font-size:3.5rem; margin-bottom:8px;">🏆</div>
-      <div class="score-number-display" id="final-score-text">0 / 0</div>
-      <div id="score-message-text" style="font-size:1.2rem; font-weight:800; color:var(--mint-code); margin:8px 0;"></div>
-      <p id="student-meta-details" style="color:var(--text-muted); font-size:0.95rem;"></p>
-      <a id="wa-share-link" href="#" target="_blank" style="display:inline-block; background:#25D366; color:#fff; padding:12px 24px; border-radius:10px; font-weight:800; text-decoration:none; margin-top:16px;">
-        📱 إرسال تقرير النتيجة لمستر خالد أشرف على واتساب
-      </a>
-    </div>
+    <div id="report-canvas-source">
+      <div class="score-banner">
+        <div id="score-emoji" style="font-size:3.5rem; margin-bottom:8px;">🏆</div>
+        <div class="score-number-display" id="final-score-text">0 / 0</div>
+        <div id="score-message-text" style="font-size:1.2rem; font-weight:800; color:var(--mint-code); margin:8px 0;"></div>
+        <p id="student-meta-details" style="color:var(--text-muted); font-size:0.95rem;"></p>
+        
+        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+          <a id="wa-share-link" href="#" target="_blank" style="background:#25D366; color:#fff; padding:12px 24px; border-radius:12px; font-weight:800; text-decoration:none;">
+            📱 إرسال التقرير على واتساب
+          </a>
+          <button id="download-pdf-manual-btn" class="btn-nav btn-nav-secondary" onclick="generateAndDownloadPDF()">
+            📄 إعادة تحميل تقرير PDF
+          </button>
+        </div>
+        <div id="pdf-status-hint" style="color:var(--mint-code); font-size:0.85rem; margin-top:10px; font-weight:bold;"></div>
+      </div>
 
-    <h3 style="margin-bottom:16px; font-weight:800;">تفاصيل الإجابات والتغذية الراجعة:</h3>
-    <div id="reviews-render-area"></div>
+      <h3 style="margin-bottom:16px; font-weight:800;">تفاصيل الأسئلة والتصحيح:</h3>
+      <div id="reviews-render-area"></div>
+    </div>
   </div>
 
 </div>
+
+<!-- حاوية مخصصة لتوليد صورة الـ PDF -->
+<div id="pdf-report-canvas"></div>
 
 <footer>
   Designed with excellence by <strong style="color:var(--mint-code);">Ahmed Taha</strong> &bull; All Rights Reserved 2026
@@ -394,33 +429,45 @@
 
 <script>
   // =========================================================================
-  // CONFIGURATION
+  // ⚙️ لوحة الإعدادات والتحكم السريع (تعديل مباشر بدون أي تعقيد)
   // =========================================================================
-  const TEACHER_PHONE = "201019502488"; // رقم مستر خالد أشرف
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyN2-FSX_Eq1kLeVtuMDVSRgxnqHZQw_4fcCsgetZ-jWZhfuNe-ZE7c5jx53s9YpcKmdQ/exec";
-  const TOTAL_DURATION = 30 * 60; // 30 دقيقة
+  const EXAM_SETTINGS = {
+    // 1. مدة الامتحان الافتراضية بالدقائق (يمكنك تغييرها من هنا متى شئت)
+    defaultDurationMinutes: 30,
 
-  // Global State
+    // 2. رقم هاتف المستر لاستقبال رسائل الواتساب
+    teacherPhone: "201019502488",
+
+    // 3. اسم المستر ورسالة التشجيع
+    teacherName: "مستر خالد أشرف",
+    encouragementQuote: "«مع أطيب التمنيات لكم بالتفوق — مستر خالد أشرف»",
+
+    // 4. رابط الـ Web App الخاص بك من Google Apps Script
+    scriptUrl: "https://script.google.com/macros/s/AKfycbyN2-FSX_Eq1kLeVtuMDVSRgxnqHZQw_4fcCsgetZ-jWZhfuNe-ZE7c5jx53s9YpcKmdQ/exec"
+  };
+
+  // State Management
   let appState = {
     formId: "",
     examTitle: "",
+    examDurationSec: EXAM_SETTINGS.defaultDurationMinutes * 60,
     questions: [],
+    currentQIndex: 0,
     userAnswers: {},
     studentName: "",
     studentPhone: "",
     examStartTimestamp: null,
     timerInterval: null,
-    submitted: false
+    submitted: false,
+    serverResult: null
   };
 
-  // Switch Screens Helper
   function switchScreen(screenId) {
     document.querySelectorAll('.screen-view').forEach(s => s.classList.remove('active'));
     document.getElementById(`${screenId}-screen`).classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Toast Notification Helper
   function triggerToast(text) {
     const toast = document.createElement('div');
     toast.className = 'toast-box';
@@ -429,7 +476,7 @@
     setTimeout(() => toast.remove(), 3200);
   }
 
-  // Web Audio API Ticks (أصوات التنبيه برمجياً دون ملفات خارجية)
+  // Web Audio Ticks
   let audioCtx = null;
   function triggerBeep() {
     try {
@@ -446,19 +493,29 @@
     } catch (e) {}
   }
 
-  // Initialize and Fetch Exam
+  // تهيئة الصفحة وقراءة الرابط
   window.addEventListener("DOMContentLoaded", async () => {
     const params = new URLSearchParams(window.location.search);
     appState.formId = params.get('id');
 
+    // ميزة ضبط الوقت من الرابط مباشرة إذا أردت تخصيصه لكل امتحان
+    const customTimeParam = params.get('time');
+    if (customTimeParam && !isNaN(customTimeParam)) {
+      appState.examDurationSec = parseInt(customTimeParam) * 60;
+    }
+
+    document.getElementById('start-quote-text').innerText = EXAM_SETTINGS.encouragementQuote;
+    document.getElementById('quiz-sub-title').innerText = `إشراف: ${EXAM_SETTINGS.teacherName}`;
+    document.getElementById('info-q-time').innerText = Math.round(appState.examDurationSec / 60);
+
     if (!appState.formId) {
-      document.getElementById('error-msg-detail').innerText = "لم يتم تحديد معرّف الاختبار في الرابط (?id=...)";
+      document.getElementById('error-msg-detail').innerText = "لم يتم تحديد معرّف النموذج في الرابط (?id=...)";
       switchScreen('error');
       return;
     }
 
     try {
-      const response = await fetch(`${SCRIPT_URL}?id=${appState.formId}`);
+      const response = await fetch(`${EXAM_SETTINGS.scriptUrl}?id=${appState.formId}`);
       const data = await response.json();
 
       if (data.status === "success" && data.questions && data.questions.length > 0) {
@@ -466,7 +523,7 @@
         appState.examTitle = data.title || "اختبار الحاسب الآلي والبرمجة";
 
         document.getElementById('start-exam-title').innerText = appState.examTitle;
-        document.getElementById('quiz-title').innerText = appState.examTitle;
+        document.getElementById('quiz-header-title').innerText = appState.examTitle;
         document.getElementById('info-q-count').innerText = appState.questions.length;
 
         switchScreen('start');
@@ -481,7 +538,6 @@
     }
   });
 
-  // Start Exam Session
   function handleStartExam(e) {
     e.preventDefault();
     const nameInput = document.getElementById('student-name');
@@ -507,85 +563,138 @@
     appState.studentName = nameInput.value.trim();
     appState.studentPhone = phoneInput.value.trim();
 
-    renderQuestionsUI();
     switchScreen('quiz');
+    renderSingleQuestion(0);
     initTimerAntiCheat();
-    triggerToast(`مرحباً بك ${appState.studentName}`);
+    triggerToast(`بالتوفيق يا ${appState.studentName}`);
   }
 
-  // Render Questions UI
-  function renderQuestionsUI() {
-    const area = document.getElementById('questions-render-area');
+  // عرض سؤال بسؤال (Step-by-Step UI) مع ضمان ظهور نص السؤال
+  function renderSingleQuestion(idx) {
+    appState.currentQIndex = idx;
+    const q = appState.questions[idx];
+    const area = document.getElementById('single-question-area');
     area.innerHTML = '';
 
-    appState.questions.forEach((q, idx) => {
-      const card = document.createElement('div');
-      card.className = 'question-card';
-      card.id = `card-${q.id}`;
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.id = `card-${q.id}`;
 
-      let inputBlock = '';
-      if (q.type === 'mcq') {
-        const optionsList = q.options.map(opt => `
-          <label class="option-row" data-qid="${q.id}" data-val="${opt}">
-            <input type="radio" name="opt_${q.id}" value="${opt}">
+    // ضمان قراءة نص السؤال حتى لو كان باسم q أو title
+    const questionText = q.q || q.title || "سؤال رقم " + (idx + 1);
+
+    let inputBlock = '';
+    if (q.type === 'mcq') {
+      const optionsList = q.options.map(opt => {
+        const isSelected = appState.userAnswers[q.id] === opt ? ' selected' : '';
+        const isChecked = appState.userAnswers[q.id] === opt ? ' checked' : '';
+        return `
+          <label class="option-row${isSelected}" data-qid="${q.id}" data-val="${opt}">
+            <input type="radio" name="opt_${q.id}" value="${opt}"${isChecked}>
             <span>${opt}</span>
           </label>
-        `).join('');
-        inputBlock = `<div>${optionsList}</div>`;
-      } else {
-        inputBlock = `
-          <textarea class="essay-field" id="essay_${q.id}" rows="4" placeholder="اكتب إجابتك هنا بدقة..."></textarea>
         `;
-      }
-
-      card.innerHTML = `
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div><span class="q-number-badge">${idx + 1}</span> <span style="font-size:0.85rem; color:var(--mint-code);">(${q.points} درجات)</span></div>
-          <span style="font-size:0.8rem; color:var(--text-muted);">${q.type === 'mcq' ? 'اختياري' : 'مقالي (تصحيح ذكي)'}</span>
-        </div>
-        <div class="q-title-text">${q.q}</div>${inputBlock}
+      }).join('');
+      inputBlock = `<div>${optionsList}</div>`;
+    } else {
+      const currentVal = appState.userAnswers[q.id] || '';
+      inputBlock = `
+        <textarea class="essay-field" id="essay_${q.id}" placeholder="اكتب إجابتك هنا بدقة...">${currentVal}</textarea>
+        <p style="color:var(--text-muted); font-size:0.8rem; margin-top:6px;">ملاحظة: هذا السؤال مقالي وسيتم تقييمه مفاهيمياً بواسطة الذكاء الاصطناعي.</p>
       `;
-      area.appendChild(card);
-    });
+    }
 
-    // Listeners for MCQ
-    document.querySelectorAll('.option-row').forEach(row => {
-      row.addEventListener('click', function() {
-        const qid = this.dataset.qid;
-        const val = this.dataset.val;
-        appState.userAnswers[qid] = val;
+    const typeBadgeText = q.type === 'mcq' ? '<span class="q-badge badge-mcq">اختيار من متعدد</span>' : '<span class="q-badge badge-essay">سؤال مقالي (تصحيح ذكي)</span>';
 
-        const parent = document.getElementById(`card-${qid}`);
-        parent.querySelectorAll('.option-row').forEach(r => r.classList.remove('selected'));
-        this.classList.add('selected');
-        parent.classList.remove('unanswered');
-        this.querySelector('input').checked = true;
-        updateProgressBar();
-      });
-    });
+    card.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>${typeBadgeText} <span style="font-size:0.85rem; color:var(--mint-code);">(${q.points} درجات)</span></div>
+        <span style="font-size:0.85rem; color:var(--text-muted); font-weight:bold;">سؤال ${idx + 1} من ${appState.questions.length}</span>
+      </div>
+      <div class="q-title-text">${questionText}</div>${inputBlock}
+      <div class="nav-bar" id="nav-bar-container"></div>
+    `;
 
-    // Listeners for Essay
-    appState.questions.forEach(q => {
-      if (q.type === 'essay') {
-        const txt = document.getElementById(`essay_${q.id}`);
-        txt.addEventListener('input', function() {
-          appState.userAnswers[q.id] = this.value.trim() || null;
-          const parent = document.getElementById(`card-${q.id}`);
-          if (appState.userAnswers[q.id]) parent.classList.remove('unanswered');
-          updateProgressBar();
+    area.appendChild(card);
+
+    // ربط الاختيارات
+    if (q.type === 'mcq') {
+      card.querySelectorAll('.option-row').forEach(row => {
+        row.addEventListener('click', function() {
+          const qid = this.dataset.qid;
+          const val = this.dataset.val;
+          appState.userAnswers[qid] = val;
+
+          card.querySelectorAll('.option-row').forEach(r => r.classList.remove('selected'));
+          this.classList.add('selected');
+          card.classList.remove('unanswered');
+          this.querySelector('input').checked = true;
+          document.getElementById('unanswered-warning').style.display = 'none';
         });
+      });
+    } else {
+      const textarea = document.getElementById(`essay_${q.id}`);
+      textarea.addEventListener('input', function() {
+        appState.userAnswers[q.id] = this.value.trim() || null;
+        if (appState.userAnswers[q.id]) card.classList.remove('unanswered');
+        document.getElementById('unanswered-warning').style.display = 'none';
+      });
+    }
+
+    renderNavButtons(idx);
+    updateProgressUI(idx);
+    document.getElementById('unanswered-warning').style.display = 'none';
+  }
+
+  function renderNavButtons(idx) {
+    const nav = document.getElementById('nav-bar-container');
+    const isFirst = idx === 0;
+    const isLast = idx === appState.questions.length - 1;
+
+    const backBtn = document.createElement('button');
+    backBtn.className = 'btn-nav btn-nav-secondary';
+    backBtn.innerText = '⟵ السابق';
+    backBtn.disabled = isFirst;
+    backBtn.onclick = () => {
+      if (appState.currentQIndex > 0) {
+        renderSingleQuestion(appState.currentQIndex - 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    });
+    };
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = isLast ? 'btn-nav btn-finish' : 'btn-nav';
+    nextBtn.innerText = isLast ? 'إنهاء وتسليم الاختبار ✔' : 'التالي ⟶';
+    nextBtn.onclick = () => {
+      const currentQ = appState.questions[idx];
+      const answer = appState.userAnswers[currentQ.id];
+
+      if (!answer || (typeof answer === 'string' && answer.trim() === '')) {
+        document.getElementById('unanswered-warning').style.display = 'block';
+        document.getElementById(`card-${currentQ.id}`).classList.add('unanswered');
+        return;
+      }
+
+      if (isLast) {
+        submitExamSession();
+      } else {
+        renderSingleQuestion(appState.currentQIndex + 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    nav.appendChild(backBtn);
+    nav.appendChild(nextBtn);
   }
 
-  function updateProgressBar() {
-    const answeredCount = Object.keys(appState.userAnswers).filter(k => appState.userAnswers[k] !== null && appState.userAnswers[k] !== "").length;
+  function updateProgressUI(idx) {
     const total = appState.questions.length;
-    const pct = (answeredCount / total) * 100;
+    const pct = ((idx + 1) / total) * 100;
     document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-text').innerText = `السؤال ${idx + 1} من ${total}`;
   }
 
-  // Wall-Clock Timer (مؤقت حقيقي ضد الغش)
+  // المؤقت الحقيقي ضد الغش
   function initTimerAntiCheat() {
     const timerElem = document.getElementById('timer-badge');
     appState.examStartTimestamp = Date.now();
@@ -593,7 +702,7 @@
     function checkTick() {
       if (appState.submitted) return;
       const elapsed = Math.floor((Date.now() - appState.examStartTimestamp) / 1000);
-      let rem = TOTAL_DURATION - elapsed;
+      let rem = appState.examDurationSec - elapsed;
       if (rem < 0) rem = 0;
 
       const m = Math.floor(rem / 60).toString().padStart(2, '0');
@@ -607,14 +716,13 @@
 
       if (rem <= 0) {
         clearInterval(appState.timerInterval);
-        submitExam(true);
+        submitExamSession(true);
       }
     }
 
     checkTick();
     appState.timerInterval = setInterval(checkTick, 1000);
 
-    // التحقق فور رجوع الطالب للتبويب
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && !appState.submitted) {
         checkTick();
@@ -622,35 +730,20 @@
     });
   }
 
-  // Submit Exam
-  async function submitExam(force = false) {
+  // تسليم الامتحان
+  async function submitExamSession(autoSubmit = false) {
     if (appState.submitted) return;
-
-    if (!force) {
-      let firstMissingId = null;
-      appState.questions.forEach(q => {
-        const val = appState.userAnswers[q.id];
-        if (!val || val.trim() === "") {
-          document.getElementById(`card-${q.id}`).classList.add('unanswered');
-          if (!firstMissingId) firstMissingId = q.id;
-        }
-      });
-
-      if (firstMissingId) {
-        document.getElementById('unanswered-warning').style.display = 'block';
-        document.getElementById(`card-${firstMissingId}`).scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return;
-      }
-    }
-
     appState.submitted = true;
     clearInterval(appState.timerInterval);
+
     document.getElementById('unanswered-warning').style.display = 'none';
-    document.getElementById('submit-btn').style.display = 'none';
     document.getElementById('submitting-spinner').style.display = 'block';
 
+    const nav = document.getElementById('nav-bar-container');
+    if (nav) nav.style.display = 'none';
+
     try {
-      const response = await fetch(SCRIPT_URL, {
+      const response = await fetch(EXAM_SETTINGS.scriptUrl, {
         method: "POST",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
         body: JSON.stringify({
@@ -663,16 +756,17 @@
 
       const result = await response.json();
       if (result.status === "success") {
+        appState.serverResult = result;
         renderResultsView(result);
+        generateAndDownloadPDF(); // توليد وتحميل ملف PDF تلقائياً
       } else {
-        alert("حدث خطأ في استلام النتيجة: " + result.message);
+        alert("تنبيه من السيرفر: " + result.message);
       }
     } catch (err) {
-      alert("تعذر الاتصال بالخادم السحابي، تأكد من الاتصال بالإنترنت.");
+      alert("حدث خطأ في الاتصال بالسيرفر، تأكد من استقرار الإنترنت.");
     }
   }
 
-  // Render Results Screen
   function renderResultsView(result) {
     const totalScore = result.totalScore;
     const maxScore = result.maxScore;
@@ -681,13 +775,12 @@
     document.getElementById('final-score-text').innerText = `${totalScore} /${maxScore}`;
     document.getElementById('score-emoji').innerText = pct >= 85 ? '🏆' : (pct >= 65 ? '😄' : '😕');
 
-    let msg = pct >= 85 ? "أداء ممتاز! استمر في هذا التفوق" : (pct >= 65 ? "جيد جداً، واصل المراجعة والتدريب" : "تحتاج إلى مراجعة المفاهيم مرة أخرى");
+    let msg = pct >= 85 ? "أداء ممتاز! استمر في هذا التفوق" : (pct >= 65 ? "جيد جداً، واصل التدريب والتفوق" : "تحتاج إلى مراجعة بعض المفاهيم");
     document.getElementById('score-message-text').innerText = `${msg} (${pct}%)`;
 
     const today = new Date().toLocaleDateString('ar-EG');
     document.getElementById('student-meta-details').innerText = `الطالب: ${appState.studentName} | الهاتف: ${appState.studentPhone} \vert{} التاريخ: ${today}`;
 
-    // Reviews Generation
     const area = document.getElementById('reviews-render-area');
     area.innerHTML = '';
     let wrongNumbers = [];
@@ -695,7 +788,6 @@
     result.reviews.forEach((r, i) => {
       const box = document.createElement('div');
       box.className = `review-box ${r.correct ? '' : 'wrong'}`;
-
       if (!r.correct) wrongNumbers.push(i + 1);
 
       let answerHtml = '';
@@ -705,7 +797,7 @@
         } else {
           answerHtml = `
             <div class="answer-tag wrong">إجابتك: ${r.userAnswer} ✗</div>
-            <div class="answer-tag correct">الإجابة الصحيحة: ${r.correctAnswer}</div>
+            <div class="answer-tag correct">الإجابة النموذجية: ${r.correctAnswer}</div>
           `;
         }
       } else {
@@ -721,19 +813,64 @@
       area.appendChild(box);
     });
 
-    // WhatsApp Message
+    // تجهيز رابط الواتساب
     let waMsg = `📊 *تقرير نتيجة الاختبار الأكاديمي*\n`;
     waMsg += `━━━━━━━━━━━━━━━━\n`;
     waMsg += `👤 *اسم الطالب:* ${appState.studentName}\n`;
     waMsg += `📱 *الهاتف:* ${appState.studentPhone}\n`;
     waMsg += `🎯 *الدرجة النهائية:* ${totalScore} / ${maxScore} (${pct}%)\n`;
     waMsg += wrongNumbers.length ? `❌ *الأسئلة التي تحتاج مراجعة:* ${wrongNumbers.join('، ')}\n` : `✅ *درجة كاملة دون أخطاء*\n`;
-    waMsg += `━━━━━━━━━━━━━━━━\nإشراف: مستر خالد أشرف`;
+    waMsg += `━━━━━━━━━━━━━━━━\nإشراف: ${EXAM_SETTINGS.teacherName}`;
 
-    document.getElementById('wa-share-link').href = `https://wa.me/${TEACHER_PHONE}?text=${encodeURIComponent(waMsg)}`;
+    document.getElementById('wa-share-link').href = `https://wa.me/${EXAM_SETTINGS.teacherPhone}?text=${encodeURIComponent(waMsg)}`;
 
     switchScreen('results');
-    triggerToast("✅ تم رصد وتوثيق النتيجة بنجاح");
+    triggerToast("✅ تم اعتماد نتيجتك بنجاح");
+  }
+
+  // توليد ملف PDF وتنزيله على جهاز الطالب
+  async function generateAndDownloadPDF() {
+    const hint = document.getElementById('pdf-status-hint');
+    hint.innerText = "⏳ جارٍ تجهيز وتحميل ملف تقرير الـ PDF...";
+
+    try {
+      const source = document.getElementById('report-canvas-source');
+      const clone = source.cloneNode(true);
+      const wrapper = document.getElementById('pdf-report-canvas');
+      wrapper.innerHTML = '';
+      wrapper.appendChild(clone);
+
+      const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#0F0A1C', useCORS: true });
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = 210;
+      const pageHeight = 297;
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      wrapper.innerHTML = '';
+      const safeName = (appState.studentName || 'Student').replace(/\s+/g, '_');
+      pdf.save(`تقرير_${safeName}.pdf`);
+      hint.innerText = "✅ تم تنزيل ملف PDF بنجاح على جهازك.";
+    } catch (e) {
+      console.error(e);
+      hint.innerText = "⚠️ تعذر التحميل التلقائي للـ PDF، يمكنك المحاولة بالضغط على الزر أعلاه.";
+    }
   }
 </script>
 </body>
